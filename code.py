@@ -40,7 +40,7 @@ balls[0].theta=initial_angle
 t = 0
 dt = 1/200
 program_rate = 100
-
+ 
  
 def collide(i, j):
     balls[j].acc=balls[i].acc
