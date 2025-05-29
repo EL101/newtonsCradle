@@ -1,7 +1,7 @@
 Web VPython 3.2
 scene = canvas()
-pos_graph = graph(title="Ball Height")
-pos_curve = gcurve(graph = pos_graph, label = "Height")
+pos_graph = graph(title="Ball Heights", xtitle="Time", ytitle = "Height")
+vel_graph = graph(title="Ball Velocities", xtitle="Time", ytitle = "Velocity")
 L=3
 initial_angle=-pi/3
 axis_pos=3
@@ -25,6 +25,8 @@ num_starting_balls=1
 
 balls=[]
 rods=[]
+pos_curves=[]
+vel_curves=[]
 balls.append(sphere(pos=vec(L * sin(initial_angle),axis_pos-L * cos(initial_angle),0), radius=ball_radius, color=color.cyan))
 rods.append(cylinder(pos=balls[0].pos, axis=vec(0,axis_pos,0)-balls[0].pos, radius=0.03, color=color.red))
 for i in range(1,num_balls):
@@ -36,12 +38,16 @@ for i in range(num_balls):
     balls[i].acc=0
     balls[i].vel=0
     balls[i].theta=0
+    curr_color=(vector.random()+vec(1,1,1))/2
+    pos_curves.append(gcurve(graph=pos_graph, color=curr_color, label="Ball "+str(i)))
+    vel_curves.append(gcurve(graph=vel_graph, color=curr_color, label="Ball "+str(i)))
+    
 balls[0].theta=initial_angle
 t = 0
 dt = 1/200
 program_rate = 100
- 
- 
+
+
 def collide(i, j):
     balls[j].acc=balls[i].acc
     balls[j].vel=balls[i].vel
@@ -64,6 +70,7 @@ while (True):
                 else if (j<i and ball.pos.x<=balls[j].pos.x+2*ball_radius):
                     collide(i,j)
 #    print(ball.acc + " " + ball.vel + " " + theta)
-#    pos_curve.plot(t, ball.pos.y)
+        pos_curves[i].plot(t, ball.pos.y)
+        vel_curves[i].plot(t, ball.vel)
     t+=dt
     
