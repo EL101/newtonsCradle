@@ -7,8 +7,8 @@ initial_angle=-pi/3
 axis_pos=3
 ball_radius=0.3
 
-num_balls=3
-num_starting_balls=1
+num_balls=5
+num_starting_balls=3
 #def setInitialAngle(x):
 #    global initial_angle
 #    initial_angle=-pi * x/180
@@ -29,7 +29,7 @@ pos_curves=[]
 vel_curves=[]
 for i in range(num_starting_balls):
     balls.append(sphere(pos=vec(L * sin(initial_angle)+2*i*ball_radius,axis_pos-L * cos(initial_angle),0), radius=ball_radius, color=color.cyan))
-    rods.append(cylinder(pos=balls[i].pos, axis=vec(0,axis_pos,0)-balls[i].pos, radius=0.03, color=color.red))
+    rods.append(cylinder(pos=balls[i].pos, axis=vec(2*i*ball_radius,axis_pos,0)-balls[i].pos, radius=0.03, color=color.red))
 for i in range(num_starting_balls,num_balls):
     balls.append(sphere(pos=vec(2*i*ball_radius,axis_pos-L,0), radius=ball_radius, color=color.cyan))
     rods.append(cylinder(pos=balls[i].pos, axis=vec(0,L,0), radius=0.03, color=color.red))
@@ -56,8 +56,9 @@ def setRt(x):
 def collide(i, j):
     balls[j].vel=balls[i].vel
     balls[i].vel=0
-    balls[i].theta=0
+#    balls[i].theta=0
 
+buffer=1E-6
 slider_title = wtext(text = "Set Rate:")
 rateSlider = slider(bind = setRt, min=10, max=2000, value=500, step=10)
 while (True):
@@ -67,17 +68,18 @@ while (True):
         if ball.vel==0 and ball.theta==0:
             continue
         for j in range(i+1, num_balls):
-            if ball.vel.mag!=0:
-                if (ball.pos.x>balls[j].pos.x-2*ball_radius):
-                    collide(i,j)
-#                    print(balls[i].pos.x)
-                    break
-        for j in range(i-1, -1, -1):
-            if ball.vel.mag!=0:
-                if (ball.pos.x<balls[j].pos.x+2*ball_radius):
+            if ball.vel>0:
+                if (ball.pos.x>balls[j].pos.x-2*ball_radius+buffer):
 #                    print(i,j,ball.pos.x,balls[j].pos.x)
                     collide(i,j)
-                    print(i,j,ball.pos.x,balls[j].pos.x)
+#                    print(i,j,ball.pos.x,balls[j].pos.x)
+                    break
+        for j in range(i-1, -1, -1):
+            if ball.vel<0:
+                if (ball.pos.x<balls[j].pos.x+2*ball_radius-buffer):
+#                    print(i,j,ball.pos.x,balls[j].pos.x)
+                    collide(i,j)
+#                    print(i,j,ball.pos.x,balls[j].pos.x)
                     break
         ball.acc=-g * sin(ball.theta)/L
         ball.vel+=ball.acc*dt
