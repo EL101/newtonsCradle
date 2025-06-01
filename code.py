@@ -7,8 +7,8 @@ initial_angle=-pi/3
 axis_pos=3
 ball_radius=0.3
 
-num_balls=5
-num_starting_balls=3
+num_balls=7
+num_starting_balls=7
 #def setInitialAngle(x):
 #    global initial_angle
 #    initial_angle=-pi * x/180
@@ -48,33 +48,49 @@ for i in range(num_balls):
 for i in range(num_starting_balls):
     balls[i].theta=initial_angle
 t = 0
-dt = 1/200
-program_rate = 500
+dt = 1/1000
+program_rate = 2000
 
 def setRt(x):
     global program_rate
     program_rate = x.value
 
 def collide(i, j):
-    balls[j].vel=balls[i].vel
+    overlap=-balls[i].theta
+    dir=balls[i].vel/abs(balls[i].vel)
+    balls[j].vel=sqrt(balls[i].vel*balls[i].vel+2*balls[i].acc*overlap)*dir
+#    print(balls[j].vel)
     balls[i].vel=0
     balls[i].theta=0
 
 buffer=1E-3
 slider_title = wtext(text = "Set Rate:")
-rateSlider = slider(bind = setRt, min=10, max=2000, value=program_rate, step=10)
+rateSlider = slider(bind = setRt, min=10, max=10000, value=program_rate, step=10)
+
+run=True
+def pause():
+    global run
+    run=!run
+    if (!run):
+        pause_button.background=color.green
+    else:
+        pause_button.background=color.red
+pause_button = button( bind=pause, text='Pause/Unpause', background=color.red)
 while (True):
     rate(program_rate)
-    moving=0
-    for i in range(num_balls):
-        if balls[i].theta!=0 or balls[i].vel!=0:
-            moving+=1
+    if !run:
+        continue
+    moving=num_balls
+    for j in range(num_balls):
+        if balls[j].theta==0 and balls[j].vel==0:
+            moving-=1
     if (moving!=num_starting_balls):
         print(moving)
         for ball in balls:
             print(ball.prev_theta, ball.prev_vel, ball.theta, ball.vel)
+        run=False
         break
-    for i in range(num_balls):
+    for i in range(num_balls):  
         ball=balls[i]
         if ball.vel==0 and ball.theta==0:
             continue
@@ -83,7 +99,7 @@ while (True):
         collided=False
         if j<num_balls and ball.vel>0:
             if (ball.pos.x>balls[j].pos.x-2*ball_radius+buffer):
-#                print(i,j,ball.pos.x,balls[j].pos.x)
+#                print("Forward:",i,j,ball.pos.x,balls[j].pos.x, ball.vel)
                 collide(i,j)
                 collided=True
 #                    print(i,j,ball.pos.x,balls[j].pos.x)
@@ -91,7 +107,7 @@ while (True):
         j=i-1
         if j>=0 and ball.vel<0:
             if (ball.pos.x<balls[j].pos.x+2*ball_radius-buffer):
-#                print(i,j,ball.pos.x,balls[j].pos.x)
+#                print("Backward:",i,j,ball.pos.x,balls[j].pos.x, ball.vel)
                 collide(i,j)
                 collided=True
 #                    print(i,j,ball.pos.x,balls[j].pos.x)
