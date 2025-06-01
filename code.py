@@ -75,7 +75,17 @@ def pause():
         pause_button.background=color.green
     else:
         pause_button.background=color.red
-pause_button = button( bind=pause, text='Pause/Unpause', background=color.red)
+pause_button=button(bind=pause, text='Pause/Unpause', background=color.red)
+
+display_graph=True
+def change_display_graph():
+    global display_graph
+    display_graph=!display_graph
+    if (!display_graph):
+        display_graph_button.background=color.green
+    else:
+        display_graph_button.background=color.red
+display_graph_button=button(bind=change_display_graph, text='Undisplay/Display', background=color.red)
 while (True):
     rate(program_rate)
     if !run:
@@ -120,8 +130,9 @@ while (True):
         rods[i].pos=ball.pos
         rods[i].axis=vec(2*i*ball_radius,axis_pos,0)-ball.pos
 #    print(ball.acc + " " + ball.vel + " " + theta)
-#    for i in range(num_balls):
-#        pos_curves[i].plot(t, balls[i].pos.y)
-#        vel_curves[i].plot(t, balls[i].vel)
+    if (display_graph):
+        for i in range(num_balls):
+            pos_curves[i].plot(t, balls[i].pos.y)
+            vel_curves[i].plot(t, balls[i].vel)
     t+=dt
     
