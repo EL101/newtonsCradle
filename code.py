@@ -8,7 +8,7 @@ axis_pos=3
 ball_radius=0.3
 
 num_balls=7
-num_starting_balls=7
+num_starting_balls=4
 #def setInitialAngle(x):
 #    global initial_angle
 #    initial_angle=-pi * x/180
@@ -78,6 +78,7 @@ def pause():
 pause_button=button(bind=pause, text='Pause/Unpause', background=color.red)
 
 display_graph=True
+graph_spacing=10
 def change_display_graph():
     global display_graph
     display_graph=!display_graph
@@ -130,9 +131,10 @@ while (True):
         rods[i].pos=ball.pos
         rods[i].axis=vec(2*i*ball_radius,axis_pos,0)-ball.pos
 #    print(ball.acc + " " + ball.vel + " " + theta)
-    if (display_graph):
+    t+=dt
+    if (display_graph and int(t/dt)%graph_spacing==0):
         for i in range(num_balls):
             pos_curves[i].plot(t, balls[i].pos.y)
             vel_curves[i].plot(t, balls[i].vel)
-    t+=dt
+    
     
