@@ -39,6 +39,8 @@ for i in range(num_balls):
     balls[i].acc=0
     balls[i].vel=0
     balls[i].theta=0
+    balls[i].prev_vel=0
+    balls[i].prev_theta=0
     curr_color=(vector.random()+vec(1,1,1))/2
     pos_curves.append(gcurve(graph=pos_graph, color=curr_color, label="Ball "+str(i)))
     vel_curves.append(gcurve(graph=vel_graph, color=curr_color, label="Ball "+str(i)))
@@ -56,31 +58,45 @@ def setRt(x):
 def collide(i, j):
     balls[j].vel=balls[i].vel
     balls[i].vel=0
-#    balls[i].theta=0
+    balls[i].theta=0
 
-buffer=1E-6
+buffer=1E-3
 slider_title = wtext(text = "Set Rate:")
-rateSlider = slider(bind = setRt, min=10, max=2000, value=500, step=10)
+rateSlider = slider(bind = setRt, min=10, max=2000, value=program_rate, step=10)
 while (True):
     rate(program_rate)
+    moving=0
+    for i in range(num_balls):
+        if balls[i].theta!=0 or balls[i].vel!=0:
+            moving+=1
+    if (moving!=num_starting_balls):
+        print(moving)
+        for ball in balls:
+            print(ball.prev_theta, ball.prev_vel, ball.theta, ball.vel)
+        break
     for i in range(num_balls):
         ball=balls[i]
         if ball.vel==0 and ball.theta==0:
             continue
-        for j in range(i+1, num_balls):
-            if ball.vel>0:
-                if (ball.pos.x>balls[j].pos.x-2*ball_radius+buffer):
+        
+        j=i+1
+        collided=False
+        if j<num_balls and ball.vel>0:
+            if (ball.pos.x>balls[j].pos.x-2*ball_radius+buffer):
+#                print(i,j,ball.pos.x,balls[j].pos.x)
+                collide(i,j)
+                collided=True
 #                    print(i,j,ball.pos.x,balls[j].pos.x)
-                    collide(i,j)
+                
+        j=i-1
+        if j>=0 and ball.vel<0:
+            if (ball.pos.x<balls[j].pos.x+2*ball_radius-buffer):
+#                print(i,j,ball.pos.x,balls[j].pos.x)
+                collide(i,j)
+                collided=True
 #                    print(i,j,ball.pos.x,balls[j].pos.x)
-                    break
-        for j in range(i-1, -1, -1):
-            if ball.vel<0:
-                if (ball.pos.x<balls[j].pos.x+2*ball_radius-buffer):
-#                    print(i,j,ball.pos.x,balls[j].pos.x)
-                    collide(i,j)
-#                    print(i,j,ball.pos.x,balls[j].pos.x)
-                    break
+        ball.prev_vel=ball.vel
+        ball.prev_theta=ball.theta
         ball.acc=-g * sin(ball.theta)/L
         ball.vel+=ball.acc*dt
         ball.theta+=ball.vel*dt
@@ -88,8 +104,8 @@ while (True):
         rods[i].pos=ball.pos
         rods[i].axis=vec(2*i*ball_radius,axis_pos,0)-ball.pos
 #    print(ball.acc + " " + ball.vel + " " + theta)
-    for i in range(num_balls):
-        pos_curves[i].plot(t, balls[i].pos.y)
-        vel_curves[i].plot(t, balls[i].vel)
+#    for i in range(num_balls):
+#        pos_curves[i].plot(t, balls[i].pos.y)
+#        vel_curves[i].plot(t, balls[i].vel)
     t+=dt
     
