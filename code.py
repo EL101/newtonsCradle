@@ -1,28 +1,73 @@
 Web VPython 3.2
-scene = canvas()
+scene = canvas(width=1000, height=500)
+
+program_rate = 2000
+def setRt(x):
+    global program_rate
+    program_rate = x.value
+    rate_text.text="Rate: " + str(x.value)
+wtext(text = "Set Rate:")
+rate_slider = slider(bind = setRt, min=10, max=10000, value=program_rate, step=10)
+rate_text = wtext("Rate: " + str(rate_slider.value))
+scene.append_to_caption('\n\n')
+
 pos_graph = graph(title="Ball Heights", xtitle="Time", ytitle = "Height")
 vel_graph = graph(title="Ball Velocities", xtitle="Time", ytitle = "Velocity")
+
 L=3
-initial_angle=-pi/3
 axis_pos=3
 ball_radius=0.3
 
-num_balls=7
-num_starting_balls=4
-#def setInitialAngle(x):
-#    global initial_angle
-#    initial_angle=-pi * x/180
-#def setNumBalls(x):
-#    global num_balls
-#    num_balls=x
-#def setNumBallsStarting(x):
-#    global num_starting_balls
-#    global num_balls
-#    num_starting_balls=min(x, num_balls)
-#initial_angle_input = slider( bind=setInitialAngle, min=0, max=90, value=60, step=1)
-#num_balls_input = slider( bind=setNumBalls, min=1, max=10, value=1, step=1)
-#num_balls_starting_input = slider( bind=setNumBallsStarting, min=1, max=10, value=1, step=1)
+initial_angle=-pi/3
+num_balls=1
+num_starting_balls=1
 
+def setInitialAngle(x):
+    global initial_angle
+    initial_angle=-pi * x.value/180
+    initial_angle_text.text="Angle: " + str(x.value)
+    
+def setNumBalls(x):
+    global num_balls
+    num_balls=x.value
+    num_balls_text.text="# of Balls: " + str(num_balls)
+    
+def setNumBallsStarting(x):
+    global num_starting_balls
+    global num_balls
+    num_starting_balls=min(x.value, num_balls)
+    num_starting_balls_text.text = "# of Elevated Balls: "+str(num_starting_balls)
+    
+def start():
+    set_initial_values.disabled=True
+    initial_angle_slider.delete()
+    num_balls_slider.delete()
+    num_starting_balls_slider.delete()
+    initial_angle_slider_caption.delete()
+    num_balls_slider_caption.delete()
+    num_starting_balls_slider_caption.delete()
+       
+initial_angle_slider_caption = wtext(text = "Set Initial Angle:")
+initial_angle_slider = slider( bind=setInitialAngle, min=0, max=90, value=60, step=1)
+initial_angle_text = wtext(text = "Angle: "+str(initial_angle_slider.value))
+scene.append_to_caption('\n\n')
+
+num_balls_slider_caption = wtext(text = "Set Total # of Balls:")
+num_balls_slider = slider(bind=setNumBalls, min=1, max=10, value=1, step=1)
+num_balls_text = wtext(text = "# of Balls: "+str(num_balls_slider.value))
+scene.append_to_caption('\n\n')
+
+num_starting_balls_slider_caption = wtext(text = "Set Total # of Elevated Balls:")
+num_starting_balls_slider = slider(bind=setNumBallsStarting, min=1, max=10, value=1, step=1)
+num_starting_balls_text = wtext(text = "# of Elevated Balls: "+str(num_starting_balls_slider.value))
+scene.append_to_caption('\n\n')
+
+set_initial_values = button(bind=start, text="Start", disabled=False)
+scene.append_to_caption('\n\n')
+
+while !set_initial_values.disabled:
+    rate(program_rate)
+print(initial_angle, num_balls, num_starting_balls)
 balls=[]
 rods=[]
 pos_curves=[]
@@ -49,11 +94,6 @@ for i in range(num_starting_balls):
     balls[i].theta=initial_angle
 t = 0
 dt = 1/1000
-program_rate = 2000
-
-def setRt(x):
-    global program_rate
-    program_rate = x.value
 
 def collide(i, j):
     overlap=-balls[i].theta
@@ -64,8 +104,6 @@ def collide(i, j):
     balls[i].theta=0
 
 buffer=1E-3
-slider_title = wtext(text = "Set Rate:")
-rateSlider = slider(bind = setRt, min=10, max=10000, value=program_rate, step=10)
 
 run=True
 def pause():
