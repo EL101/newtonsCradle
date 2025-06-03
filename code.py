@@ -1,15 +1,17 @@
 Web VPython 3.2
 scene = canvas(width=1000, height=500)
 
-program_rate = 2000
-def setRt(x):
-    global program_rate
-    program_rate = x.value
-    rate_text.text="Rate: " + str(x.value)
-wtext(text = "Set Rate:")
-rate_slider = slider(bind = setRt, min=10, max=10000, value=program_rate, step=10)
-rate_text = wtext("Rate: " + str(rate_slider.value))
-scene.append_to_caption('\n\n')
+program_rate = 1000
+
+#program rate slider - DISABLE FOR USER
+#def setRt(x):
+#    global program_rate
+#    program_rate = x.value
+#    rate_text.text="Rate: " + str(x.value)
+#wtext(text = "Set Rate:")
+#rate_slider = slider(bind = setRt, min=10, max=1000000, value=program_rate, step=10)
+#rate_text = wtext("Rate: " + str(rate_slider.value))
+#scene.append_to_caption('\n\n')
 
 pos_graph = graph(title="Ball Heights", xtitle="Time", ytitle = "Height")
 vel_graph = graph(title="Ball Velocities", xtitle="Time", ytitle = "Velocity")
@@ -67,17 +69,21 @@ scene.append_to_caption('\n\n')
 
 while !set_initial_values.disabled:
     rate(program_rate)
-print(initial_angle, num_balls, num_starting_balls)
+#print(initial_angle, num_balls, num_starting_balls)
+
+offset=-ball_radius*num_balls
+
 balls=[]
 rods=[]
 pos_curves=[]
 vel_curves=[]
+
 for i in range(num_starting_balls):
-    balls.append(sphere(pos=vec(L * sin(initial_angle)+2*i*ball_radius,axis_pos-L * cos(initial_angle),0), radius=ball_radius, color=color.cyan))
-    rods.append(cylinder(pos=balls[i].pos, axis=vec(2*i*ball_radius,axis_pos,0)-balls[i].pos, radius=0.03, color=color.red))
+    balls.append(sphere(pos=vec(L * sin(initial_angle)+2*i*ball_radius+offset,axis_pos-L * cos(initial_angle),0), radius=ball_radius, color=color.red, texture=textures.metal))
+    rods.append(cylinder(pos=balls[i].pos, axis=vec(2*i*ball_radius+offset,axis_pos,0)-balls[i].pos, radius=0.03, color=color.white))
 for i in range(num_starting_balls,num_balls):
-    balls.append(sphere(pos=vec(2*i*ball_radius,axis_pos-L,0), radius=ball_radius, color=color.cyan))
-    rods.append(cylinder(pos=balls[i].pos, axis=vec(0,L,0), radius=0.03, color=color.red))
+    balls.append(sphere(pos=vec(2*i*ball_radius+offset,axis_pos-L,0), radius=ball_radius, color=color.white, texture=textures.metal))
+    rods.append(cylinder(pos=balls[i].pos, axis=vec(0,L,0), radius=0.03, color=color.white))
 
 g = 9.81
 for i in range(num_balls):
@@ -93,15 +99,16 @@ for i in range(num_balls):
 for i in range(num_starting_balls):
     balls[i].theta=initial_angle
 t = 0
-dt = 1/1000
+dt = 1/2000
 
 def collide(i, j):
-    overlap=-balls[i].theta
-    dir=balls[i].vel/abs(balls[i].vel)
-    balls[j].vel=sqrt(balls[i].vel*balls[i].vel+2*balls[i].acc*overlap)*dir
+    overlap=balls[j].theta-balls[i].theta
+#    dir=balls[i].vel/abs(balls[i].vel)
+#    balls[j].vel=sqrt(balls[i].vel*balls[i].vel+2*balls[i].acc*overlap)*dir
+    balls[j].vel=balls[i].vel
 #    print(balls[j].vel)
     balls[i].vel=0
-    balls[i].theta=0
+    balls[i].theta+=overlap
 
 buffer=1E-3
 
@@ -111,9 +118,11 @@ def pause():
     run=!run
     if (!run):
         pause_button.background=color.green
+        pause_button.text='Unpause'
     else:
         pause_button.background=color.red
-pause_button=button(bind=pause, text='Pause/Unpause', background=color.red)
+        pause_button.text='Pause'
+pause_button=button(bind=pause, text='Pause', background=color.red)
 
 display_graph=True
 graph_spacing=10
@@ -122,9 +131,11 @@ def change_display_graph():
     display_graph=!display_graph
     if (!display_graph):
         display_graph_button.background=color.green
+        display_graph_button.text='Display'
     else:
         display_graph_button.background=color.red
-display_graph_button=button(bind=change_display_graph, text='Undisplay/Display', background=color.red)
+        display_graph_button.text='Undisplay'
+display_graph_button=button(bind=change_display_graph, text='Undisplay', background=color.red)
 while (True):
     rate(program_rate)
     if !run:
@@ -165,14 +176,12 @@ while (True):
         ball.acc=-g * sin(ball.theta)/L
         ball.vel+=ball.acc*dt
         ball.theta+=ball.vel*dt
-        ball.pos=vec(L * sin(ball.theta)+2*i*ball_radius,axis_pos-L * cos(ball.theta),0)
+        ball.pos=vec(L * sin(ball.theta)+2*i*ball_radius+offset,axis_pos-L * cos(ball.theta),0)
         rods[i].pos=ball.pos
-        rods[i].axis=vec(2*i*ball_radius,axis_pos,0)-ball.pos
-#    print(ball.acc + " " + ball.vel + " " + theta)
+        rods[i].axis=vec(2*i*ball_radius+offset,axis_pos,0)-ball.pos#    print(ball.acc + " " + ball.vel + " " + theta)
     t+=dt
     if (display_graph and int(t/dt)%graph_spacing==0):
         for i in range(num_balls):
             pos_curves[i].plot(t, balls[i].pos.y)
             vel_curves[i].plot(t, balls[i].vel)
-    
-    
+
